@@ -2,6 +2,10 @@
 name = "db"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "Cloudiful"
+]
+repository = "https://cloudiful.cn:59443/crates/db"
 
 [dependencies]
 log = "0.4.22"
