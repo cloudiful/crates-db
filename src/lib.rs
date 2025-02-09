@@ -85,7 +85,7 @@ impl SqlResult {
         match self {
             SqlResult::String(val) => { Ok(val) }
             // if null then return ""
-            SqlResult::Null() => { Ok(String::new()) }
+            SqlResult::Null => { Ok(String::new()) }
             _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::String")) }
         }
     }
