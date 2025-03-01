@@ -7,20 +7,7 @@ use serde::Serialize;
 use sqlx::postgres::{PgPoolOptions, PgRow};
 use sqlx::{Column, PgPool, Pool, Postgres, Row, TypeInfo, ValueRef};
 
-/// Connect to database
-pub async fn connect(
-    db: &str,
-    username: &str,
-    password: &str,
-    host: &str,
-    port: &str,
-    db_name: &str,
-) -> Pool<Postgres> {
-    let url = format!(
-        "{}://{}:{}@{}:{}/{}",
-        db, username, password, host, port, db_name
-    );
-
+pub async fn connect_url(url: &str) -> Result<Pool<Postgres>, Error> {
     loop {
         info!("💪 Trying to connect to database");
 
@@ -34,12 +21,12 @@ pub async fn connect(
                 let used_time = start_time.elapsed().as_millis();
 
                 info!(
-                    "🏎️ Connecting: {}:{} | Database:{} | User:{}\n
+                    "🏎️ Connecting: Database\n
 ⏳ Time used: {} ms",
-                    host, port, db_name, username, used_time
+                    used_time
                 );
 
-                return pool;
+                return Ok(pool);
             }
 
             // if not retry in 30 seconds
@@ -49,6 +36,23 @@ pub async fn connect(
             }
         }
     }
+}
+
+/// Connect to database
+pub async fn connect(
+    db: &str,
+    username: &str,
+    password: &str,
+    host: &str,
+    port: &str,
+    db_name: &str,
+) -> Result<Pool<Postgres>, Error> {
+    let url = format!(
+        "{}://{}:{}@{}:{}/{}",
+        db, username, password, host, port, db_name
+    );
+
+    connect_url(&url).await
 }
 
 /// Store values through enum
@@ -75,42 +79,57 @@ impl SqlResult {
     /// convert SqlResult:I32 to i32
     pub fn to_i32(self) -> Result<i32, Error> {
         match self {
-            SqlResult::I32(val) => { Ok(val) }
-            _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::I32")) }
+            SqlResult::I32(val) => Ok(val),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Can only use this function on SqlResult::I32",
+            )),
         }
     }
 
     /// convert SqlResult::String to String
     pub fn to_string(self) -> Result<String, Error> {
         match self {
-            SqlResult::String(val) => { Ok(val) }
+            SqlResult::String(val) => Ok(val),
             // if null then return ""
-            SqlResult::Null => { Ok(String::new()) }
-            _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::String")) }
+            SqlResult::Null => Ok(String::new()),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Can only use this function on SqlResult::String",
+            )),
         }
     }
 
     /// convert SqlResult:BOOL to bool
     pub fn to_bool(self) -> Result<bool, Error> {
         match self {
-            SqlResult::BOOL(val) => { Ok(val) }
-            _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::BOOL")) }
+            SqlResult::BOOL(val) => Ok(val),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Can only use this function on SqlResult::BOOL",
+            )),
         }
     }
 
     /// convert SqlResult:DATE to chrono::NaiveDate
     pub fn to_date(self) -> Result<chrono::NaiveDate, Error> {
         match self {
-            SqlResult::DATE(val) => { Ok(val) }
-            _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::DATE")) }
+            SqlResult::DATE(val) => Ok(val),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Can only use this function on SqlResult::DATE",
+            )),
         }
     }
 
     /// convert SqlResult:TIME to chrono::NaiveTime
     pub fn to_time(self) -> Result<chrono::NaiveTime, Error> {
         match self {
-            SqlResult::TIME(val) => { Ok(val) }
-            _ => { Err(Error::new(ErrorKind::InvalidInput, "Can only use this function on SqlResult::TIME")) }
+            SqlResult::TIME(val) => Ok(val),
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Can only use this function on SqlResult::TIME",
+            )),
         }
     }
 }
